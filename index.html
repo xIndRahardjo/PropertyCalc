@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediksi Harga Properti AI</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // CONFIG FIREBASE - GANTI DENGAN MILIK ANDA
+        const firebaseConfig = {
+            databaseURL: "https://cloud-dasboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "Cloud-Dashboard"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.prediksiHarga = function() {
+            const luas = document.getElementById('luas').value;
+            const kamar = document.getElementById('kamar').value;
+            const mandi = document.getElementById('mandi').value;
+            const garasi = document.getElementById('garasi').value;
+            const hasilText = document.getElementById('hasil');
+
+            if(!luas || !kamar || !mandi || !garasi) {
+                alert("Mohon isi semua data!"); return;
+            }
+
+            hasilText.innerText = "Meminta AI di Kaggle untuk menghitung... ⏳";
+
+            // Push request ke Firebase
+            const reqRef = ref(db, 'prediksi_harga');
+            const newReq = push(reqRef, {
+                luas: luas, kamar: kamar, mandi: mandi, garasi: garasi,
+                status: "pending", hasil_prediksi: ""
+            });
+
+            // Listen perubahan status dari Kaggle
+            onValue(newReq, (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'done') {
+                    hasilText.innerText = "Estimasi Harga: " + data.hasil_prediksi + " ✅";
+                }
+            });
+        }
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        input { display: block; margin-bottom: 15px; width: 100%; padding: 8px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; width: 100%;}
+        .result { margin-top: 20px; font-size: 1.2em; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <h2>Kalkulator Prediksi Harga Properti AI 🏠</h2>
+    <p>Sistem ini menggunakan Machine Learning dari Dataset Kaggle secara Real-Time via Cloud Microservices.</p>
+    
+    <label>Luas Bangunan (sqft):</label>
+    <input type="number" id="luas" placeholder="Misal: 1500">
+    
+    <label>Jumlah Kamar Tidur:</label>
+    <input type="number" id="kamar" placeholder="Misal: 3">
+    
+    <label>Jumlah Kamar Mandi:</label>
+    <input type="number" id="mandi" placeholder="Misal: 2">
+    
+    <label>Kapasitas Mobil di Garasi:</label>
+    <input type="number" id="garasi" placeholder="Misal: 2">
+    
+    <button onclick="prediksiHarga()">Mulai Prediksi</button>
+
+    <div class="result" id="hasil"></div>
+</body>
+</html>
