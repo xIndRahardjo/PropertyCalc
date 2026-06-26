@@ -2,12 +2,13 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediksi Harga Properti AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIG FIREBASE - GANTI DENGAN MILIK ANDA
         const firebaseConfig = {
             databaseURL: "https://cloud-dasboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "Cloud-Dashboard"
@@ -17,59 +18,307 @@
         const db = getDatabase(app);
 
         window.prediksiHarga = function() {
-            const luas = document.getElementById('luas').value;
-            const kamar = document.getElementById('kamar').value;
-            const mandi = document.getElementById('mandi').value;
+            const luas   = document.getElementById('luas').value;
+            const kamar  = document.getElementById('kamar').value;
+            const mandi  = document.getElementById('mandi').value;
             const garasi = document.getElementById('garasi').value;
-            const hasilText = document.getElementById('hasil');
+            const resultBox  = document.getElementById('result-box');
+            const resultText = document.getElementById('hasil');
+            const btn        = document.getElementById('btn-prediksi');
 
-            if(!luas || !kamar || !mandi || !garasi) {
-                alert("Mohon isi semua data!"); return;
+            if (!luas || !kamar || !mandi || !garasi) {
+                showError("Mohon isi semua kolom sebelum memulai prediksi.");
+                return;
             }
 
-            hasilText.innerText = "Meminta AI di Kaggle untuk menghitung... ⏳";
+            resultBox.className = 'result-box loading';
+            resultBox.style.display = 'flex';
+            resultText.innerHTML = '<span class="spinner"></span> Menghubungi model ML via Cloud&hellip;';
+            btn.disabled = true;
+            btn.textContent = 'Memproses…';
 
-            // Push request ke Firebase
             const reqRef = ref(db, 'prediksi_harga');
             const newReq = push(reqRef, {
-                luas: luas, kamar: kamar, mandi: mandi, garasi: garasi,
+                luas, kamar, mandi, garasi,
                 status: "pending", hasil_prediksi: ""
             });
 
-            // Listen perubahan status dari Kaggle
             onValue(newReq, (snapshot) => {
                 const data = snapshot.val();
                 if (data && data.status === 'done') {
-                    hasilText.innerText = "Estimasi Harga: " + data.hasil_prediksi + " ✅";
+                    resultBox.className = 'result-box success';
+                    resultText.innerHTML =
+                        '<span class="result-label">Estimasi Harga Properti</span>' +
+                        '<span class="result-value">' + data.hasil_prediksi + '</span>';
+                    btn.disabled = false;
+                    btn.textContent = 'Prediksi Ulang';
                 }
             });
         }
+
+        function showError(msg) {
+            const resultBox  = document.getElementById('result-box');
+            const resultText = document.getElementById('hasil');
+            resultBox.className = 'result-box error';
+            resultBox.style.display = 'flex';
+            resultText.innerHTML = '<span class="error-icon">&#9888;</span> ' + msg;
+        }
     </script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        input { display: block; margin-bottom: 15px; width: 100%; padding: 8px; }
-        button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; width: 100%;}
-        .result { margin-top: 20px; font-size: 1.2em; font-weight: bold; color: #28a745; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem 1rem 3rem;
+            color: #1a202c;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            width: 100%;
+            max-width: 520px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .badge-sim {
+            display: inline-block;
+            background: #ebf4ff;
+            color: #2b6cb0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #bee3f8;
+            margin-bottom: 0.75rem;
+        }
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1a202c;
+            line-height: 1.3;
+            margin-bottom: 0.4rem;
+        }
+        .page-header p {
+            font-size: 0.85rem;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+            padding: 2rem;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        /* ── Form grid ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #4a5568;
+            letter-spacing: 0.01em;
+        }
+        .field label span { display: block; font-weight: 400; color: #a0aec0; font-size: 11px; }
+        .field input {
+            height: 44px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+            background: #f7fafc;
+            transition: border-color .15s, box-shadow .15s;
+            outline: none;
+        }
+        .field input:hover { border-color: #cbd5e0; }
+        .field input:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66,153,225,0.15);
+            background: #fff;
+        }
+        .field input::placeholder { color: #cbd5e0; }
+
+        /* ── Button ── */
+        #btn-prediksi {
+            width: 100%;
+            height: 48px;
+            background: #2b6cb0;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+            margin-bottom: 1.25rem;
+        }
+        #btn-prediksi:hover:not(:disabled) { background: #2c5282; }
+        #btn-prediksi:active:not(:disabled) { transform: scale(0.99); }
+        #btn-prediksi:disabled { background: #a0aec0; cursor: not-allowed; }
+
+        /* ── Result box ── */
+        .result-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            min-height: 80px;
+            transition: background .2s;
+        }
+        .result-box.loading  { display: flex; background: #ebf8ff; color: #2b6cb0; font-size: 14px; }
+        .result-box.success  { display: flex; background: #f0fff4; border: 1.5px solid #9ae6b4; }
+        .result-box.error    { display: flex; background: #fff5f5; border: 1.5px solid #feb2b2; color: #c53030; font-size: 13.5px; }
+
+        .result-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #276749; }
+        .result-value { font-size: 1.5rem; font-weight: 600; color: #22543d; }
+
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid #bee3f8;
+            border-top-color: #2b6cb0;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-icon { font-size: 16px; }
+
+        /* ── Divider ── */
+        .divider {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 1.5rem 0 1rem;
+        }
+
+        /* ── Info stack ── */
+        .info-stack {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .info-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #4a5568;
+            flex: 1;
+            min-width: 140px;
+        }
+        .info-chip .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-blue   { background: #4299e1; }
+        .dot-green  { background: #48bb78; }
+        .dot-orange { background: #ed8936; }
+
+        /* ── Footer identity ── */
+        .footer-id {
+            margin-top: 1.25rem;
+            text-align: center;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        .footer-id strong { color: #718096; }
+
+        @media (max-width: 420px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .card { padding: 1.5rem 1.25rem; }
+        }
     </style>
 </head>
 <body>
-    <h2>Kalkulator Prediksi Harga Properti AI 🏠</h2>
-    <p>Sistem ini menggunakan Machine Learning dari Dataset Kaggle secara Real-Time via Cloud Microservices.</p>
-    
-    <label>Luas Bangunan (sqft):</label>
-    <input type="number" id="luas" placeholder="Misal: 1500">
-    
-    <label>Jumlah Kamar Tidur:</label>
-    <input type="number" id="kamar" placeholder="Misal: 3">
-    
-    <label>Jumlah Kamar Mandi:</label>
-    <input type="number" id="mandi" placeholder="Misal: 2">
-    
-    <label>Kapasitas Mobil di Garasi:</label>
-    <input type="number" id="garasi" placeholder="Misal: 2">
-    
-    <button onclick="prediksiHarga()">Mulai Prediksi</button>
 
-    <div class="result" id="hasil"></div>
+    <header class="page-header">
+        <span class="badge-sim">&#128396; Simulasi &mdash; Tugas Cloud Computing</span>
+        <h1>Prediksi Harga Properti AI</h1>
+        <p>Model Machine Learning berjalan di Kaggle Kernel &amp; dihubungkan<br>
+           melalui Firebase Realtime Database sebagai cloud microservice.</p>
+    </header>
+
+    <div class="card">
+
+        <div class="form-grid">
+            <div class="field">
+                <label>Luas Bangunan <span>dalam sqft</span></label>
+                <input type="number" id="luas" placeholder="cth: 1500" min="0">
+            </div>
+            <div class="field">
+                <label>Kamar Tidur <span>jumlah unit</span></label>
+                <input type="number" id="kamar" placeholder="cth: 3" min="0">
+            </div>
+            <div class="field">
+                <label>Kamar Mandi <span>jumlah unit</span></label>
+                <input type="number" id="mandi" placeholder="cth: 2" min="0">
+            </div>
+            <div class="field">
+                <label>Kapasitas Garasi <span>jumlah mobil</span></label>
+                <input type="number" id="garasi" placeholder="cth: 1" min="0">
+            </div>
+        </div>
+
+        <button id="btn-prediksi" onclick="prediksiHarga()">Mulai Prediksi</button>
+
+        <div class="result-box" id="result-box">
+            <div id="hasil"></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="info-stack">
+            <div class="info-chip">
+                <span class="dot dot-blue"></span>
+                Firebase RealtimeDB
+            </div>
+            <div class="info-chip">
+                <span class="dot dot-green"></span>
+                Kaggle Kernel (ML)
+            </div>
+            <div class="info-chip">
+                <span class="dot dot-orange"></span>
+                Cloud Microservice
+            </div>
+        </div>
+
+        <div class="footer-id">
+            <strong>Nathanael Indra</strong> &mdash; 163231004<br>
+            Teknik Robotika &amp; Kecerdasan Buatan &middot; FTMM Universitas Airlangga
+        </div>
+
+    </div>
+
 </body>
 </html>
