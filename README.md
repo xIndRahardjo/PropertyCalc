@@ -1,50 +1,62 @@
-# 🏡 Kalkulator Cerdas Prediksi Harga Properti AI
-**Proyek Akhir Komputasi Awan (RKK401) - Arsitektur Event-Driven Microservices**
-
-## 👥 Identitas Kelompok (RK-A1)
-* **NATHANAEL INDRA R P** (163231004)
-* **RIDHOILLAH RACHMANSYAH** (163231011)
-
-## 📌 Deskripsi Proyek
-Proyek ini adalah implementasi konsep **Cloud Computing (Microservices & MLOps)**. Kami membangun sistem kecerdasan buatan berbasis web untuk memprediksi harga properti berdasarkan dataset Kaggle menggunakan algoritma **XGBoost**. 
-
-Sistem ini menghindari arsitektur monolitik dan mengadopsi pemisahan fungsional:
-1.  **Frontend (Vercel/PaaS):** Antarmuka web statis yang sangat ringan.
-2.  **Message Broker (Firebase BaaS):** Mengelola antrean *request* secara asinkron (*Event-Driven*).
-3.  **Backend AI (Kaggle IaaS):** *Worker* yang berjalan di cloud untuk melakukan *load* model ML dan mengeksekusi komputasi berat.
+# PANDUAN EKSEKUSI PROYEK (README)
+**Mata Kuliah:** Komputasi Awan (RKK401)
+**Judul Proyek:** Kalkulator Cerdas Prediksi Harga Properti AI Menggunakan Arsitektur Event-Driven Microservices
 
 ---
 
-## 📂 Struktur Folder Pengumpulan
-Sesuai dengan ketentuan tugas, folder ini berisi:
-* `/Dataset` : Berisi `train.csv` dan `test.csv` (Dataset Kaggle asli).
-* `Kaggle_Backend_XGBoost.ipynb` : Skrip utama Python untuk *data preprocessing*, *training*, *hyperparameter tuning*, dan *Real-time AI Worker*.
-* `index.html` : Skrip antarmuka web (Frontend UI).
-* `Laporan_Project_Cloud_Computing.pdf` : Laporan lengkap analisis dan pembahasan arsitektur cloud.
-* `firebase-key.json` : File kredensial (kunci) untuk mengakses broker Firebase kami. *(Penting untuk koneksi Worker)*
+### IDENTITAS MAHASISWA
+* **Nama:** Nathanael Indra R P
+* **NIM:** 163231004
+* **Kelas:** RK – A1
+* **Program Studi:** Teknik Robotika dan Kecerdasan Buatan
+* **Fakultas:** Teknologi Maju dan Multidisiplin, Universitas Airlangga
 
 ---
 
-## 🚀 Cara Menjalankan Ulang Sistem (Reproduce) Secara Mandiri
-
-Bapak/Ibu Dosen dapat menjalankan ulang sistem ini secara utuh dengan mengikuti 2 tahapan berikut:
-
-### TAHAP 1: Menyalakan Backend AI di Kaggle (Worker)
-1. Buka [Kaggle](https://www.kaggle.com/) dan buat *Notebook* baru, atau cukup unggah (import) file `Kaggle_Backend_XGBoost.ipynb` yang kami lampirkan.
-2. Unggah file dataset (`train.csv` & `test.csv`) ke dalam environment Kaggle tersebut.
-3. Unggah file kredensial `firebase-key.json` yang kami lampirkan ke dalam environment Kaggle.
-4. Sesuaikan *path* dataset dan file JSON di dalam kode *Notebook* sesuai dengan letak file di Kaggle Anda.
-5. **Jalankan Cell 1 (Training & Export):** Cell ini akan membersihkan data, melatih AI dengan XGBoost, mencari parameter terbaik (*tuning*), mengevaluasi metrik (MAE & R2), lalu mengekspor model menjadi file `xgboost_harga_rumah_tuned.pkl`.
-6. **Jalankan Cell 2 (AI Worker Server):** Setelah Cell 1 selesai, jalankan Cell 2. Cell ini akan terus berputar (*infinite running loop*) dan bertindak sebagai server. Anda akan melihat log konfirmasi:  
-   `📡 AI XGBoost Standby. Terhubung ke Firebase. Menunggu request...`
-
-### TAHAP 2: Menggunakan Frontend Web (Client)
-1. Buka file `index.html` menggunakan peramban (browser) apa pun (Chrome/Edge/Firefox). Sebagai alternatif, Bapak/Ibu juga dapat mengakses *live URL* Vercel kami di: `[MASUKKAN_URL_VERCEL_ANDA_DI_SINI]`
-2. Masukkan spesifikasi rumah pada form yang disediakan (misal: Luas 1500, Kamar 3, Kamar Mandi 2, Garasi 2).
-3. Klik tombol **"Mulai Prediksi"**.
-4. **Perhatikan *split screen* (Layar Web & Layar Kaggle):** * Di browser web, teks akan berubah menjadi menunggu respons AI.
-   * Di tab Kaggle (Tahap 1), akan muncul log secara seketika (*real-time*) bahwa data berhasil ditarik, diolah ke dalam model XGBoost, dan dikirim kembali.
-   * Di browser web, hasil estimasi harga (dalam Rupiah) akan langsung ter-render di layar tanpa perlu *refresh* halaman.
+### 1. DESKRIPSI SINGKAT SISTEM
+Sistem ini merupakan aplikasi prediksi harga properti (real estat) berbasis *Machine Learning* (XGBoost) yang diimplementasikan menggunakan arsitektur **Event-Driven Microservices**. Sistem memisahkan beban komputasi secara fungsional ke dalam tiga layanan awan:
+1.  **Frontend (Vercel / Local Browser):** Antarmuka pengguna (*Client-side*).
+2.  **Message Broker (Firebase Realtime Database):** Menjembatani antrean data secara asinkron.
+3.  **AI Inference Worker (Kaggle Cloud):** Mengeksekusi pemodelan *Machine Learning* dan memberikan hasil prediksi secara *real-time*.
 
 ---
-*Proyek ini mendemonstrasikan efektivitas komputasi awan dalam mendelegasikan beban proses Machine Learning tingkat lanjut dari sisi pengguna ke ekosistem infrastruktur awan.*
+
+### 2. STRUKTUR BERKAS (FILE)
+Di dalam folder pengumpulan ini, terdapat berkas-berkas berikut:
+* `Kalkulator_Harga_Properti.ipynb` : Skrip Python (Jupyter Notebook) yang berisi kode prapemrosesan data, pelatihan model XGBoost, dan *worker* layanan *cloud*.
+* `index.html` : Berkas antarmuka web (Frontend).
+* `train.csv` & `test.csv` : Dataset historis harga rumah yang digunakan untuk proses analisis.
+* `Laporan_Project_Cloud_Computing.pdf` : Laporan komprehensif proyek.
+* `README.md` : Panduan eksekusi sistem (berkas ini).
+
+---
+
+### 3. PANDUAN EKSEKUSI (STEP-BY-STEP)
+
+Untuk menjalankan ulang sistem ini dan melakukan pengujian secara mandiri, mohon ikuti langkah-langkah berikut:
+
+#### Langkah A: Menjalankan Backend AI Worker (Kaggle)
+1. Buka *platform* **Kaggle** (https://www.kaggle.com) dan buat *Notebook* baru.
+2. Unggah (*upload*) berkas `Kalkulator_Harga_Properti.ipynb` ke dalam *Notebook* tersebut melalui menu *File > Import Notebook*.
+3. Unggah dataset `train.csv` dan `test.csv` melalui menu *Add Data* di panel sebelah kanan Kaggle.
+4. *(Catatan: Kunci kredensial Firebase berformat `.json` umumnya telah diintegrasikan atau disertakan di dalam folder jika diperlukan untuk autentikasi koneksi).*
+5. Pastikan fitur **Internet** pada Kaggle *Notebook* telah diaktifkan (melalui panel *Settings* di sebelah kanan).
+6. Jalankan **Sel 1 (Cell 1)** untuk memulai proses analisis data, *Hyperparameter Tuning*, pelatihan model XGBoost, dan pengeksporan model (`.pkl`).
+7. Setelah Sel 1 selesai, jalankan **Sel 2 (Cell 2)**. Sel ini akan berjalan terus-menerus (*infinite loop*) dan menampilkan status: `📡 AI XGBoost Standby. Terhubung ke Firebase. Menunggu request...`. **Biarkan sel ini tetap menyala**.
+
+#### Langkah B: Menjalankan Frontend Web
+1. Buka berkas `index.html` langsung menggunakan peramban web (*browser*) apa saja (seperti Google Chrome atau Mozilla Firefox).
+   * *(Alternatif: Jika sistem telah di-deploy ke Vercel, Anda dapat langsung mengunjungi tautan URL Vercel yang telah disediakan di dalam laporan).*
+
+#### Langkah C: Menguji Prediksi Real-Time
+1. Pada halaman web yang telah terbuka, masukkan nilai spesifikasi properti pada kolom yang tersedia (Luas Bangunan, Jumlah Kamar Tidur, Jumlah Kamar Mandi, dan Kapasitas Garasi).
+2. Klik tombol **"Mulai Prediksi"**.
+3. Perhatikan halaman web. Status akan berubah menjadi "Meminta AI di Kaggle untuk menghitung...".
+4. **Buka kembali *tab* Kaggle Notebook Anda**. Pada *log output* Sel 2, Anda akan melihat respons masuk secara instan: 
+   `⬇️ Menerima request dari Web...` dan `⬆️ Hasil XGBoost dikirim: Rp ...`
+5. **Kembali ke *tab* halaman web**, dan taksiran harga rumah akan langsung muncul di layar secara *real-time* tanpa perlu memuat ulang (*refresh*) halaman.
+
+---
+
+### 4. CATATAN PENILAIAN
+Keberhasilan pengujian ini mendemonstrasikan efisiensi arsitektur *Cloud Computing* di mana peramban web lokal (*client*) tidak terbebani oleh proses komputasi *Machine Learning* yang berat, melainkan mendelegasikan tugas tersebut sepenuhnya kepada infrastruktur awan (Kaggle) melalui komunikasi *Event-Driven* (Firebase).
